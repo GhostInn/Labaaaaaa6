@@ -6,20 +6,22 @@ public static class Program
     // Этот метод является точкой входа в приложение.
     public static void Main()
     {
-        // Создаем экземпляр класса CsvFileReader<Person> и передаем в него делегат для преобразования массива строк в объект Person.
-        var csvReader = new CsvFileReader<Person>(values => new Person
+        // Чтение CSV
+        IFileReader<MyData> csvReader = new CsvFileReader<MyData>();
+        var csvRecords = csvReader.ReadCsv("data.csv");
+        Console.WriteLine("CSV Records:");
+        foreach (var record in csvRecords)
         {
-            Name = values[0],
-            Age = int.Parse(values[1], CultureInfo.InvariantCulture)
-        });
-
-        // Создаем экземпляр класса JsonFileReaderDecorator<Person> и передаем в него созданный ранее экземпляр класса CsvFileReader<Person>.
-        var jsonReader = new JsonFileReaderDecorator<Person>(csvReader);
-
-        // Читаем JSON-файл с помощью созданного ранее экземпляра класса JsonFileReaderDecorator<Person> и выводим информацию о каждом человеке на консоль.
-        foreach (var person in jsonReader.Read("persons.json"))
-        {
-            Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+            Console.WriteLine($"Id: {record.Id}, Name: {record.Name}");
         }
+
+        // Чтение JSON с использованием декоратора
+        IFileReader<MyData> fileReader = new FileReaderDecorator<MyData>(csvReader);
+        var jsonRecords = fileReader.ReadJson("data.json");
+        Console.WriteLine("\nJSON Records:");
+        foreach (var record in jsonRecords)
+        {
+            Console.WriteLine($"Id: {record.Id}, Name: {record.Name}");
+        } 
     }
 }
